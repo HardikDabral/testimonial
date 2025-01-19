@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonial Stack Carousel</title>
+    <link rel="stylesheet" href="./testimonial.css" />
+</head>
+<body>
+    <div class="testimonial-container">
+        <div class="image-section">
+            <div class="image-stack" id="stack">
+                <div id="image-container"></div>
+            </div>            
+        </div>
+        <div class="content-section">
+            <div>
+                <div class="testimonial-header">
+                    <h1 id="testimonial-name"></h1>
+                    <p id="testimonial-title"></p>
+                </div>
+                <p class="testimonial-quote" id="testimonial-quote"></p>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="left-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12l14 0"></path>
+                        <path d="M5 12l6 6"></path>
+                        <path d="M5 12l6 -6"></path>
+                    </svg>
+                </button>
+                <button class="nav-button" id="right-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12l14 0"></path>
+                        <path d="M13 18l6 -6"></path>
+                        <path d="M13 6l6 6"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const testimonials = [
+            {
+                name: "Michael Rodriguez",
+                title: "CTO at InnovateSphere",
+                quote: "Implementation was seamless and the results exceeded our expectations. The platform's flexibility is remarkable.",
+                image: "/images/photo-1438761681033-6461ffad8d80.jpg",
+            },
+            {
+                name: "Sophia Johnson",
+                title: "CEO at BrightTech",
+                quote: "This solution has significantly improved our team's productivity. The intuitive interface makes complex tasks simple. ",
+                image: "/images/photo-1623582854588-d60de57fa33f.jpg",
+            },
+            {
+                name: "James Anderson",
+                title: "Lead Developer at CodeFactory",
+                quote: "The scalability and performance have been game-changing for our organization. Highly recommend to any growing business. ",
+                image: "/images/photo-1624561172888-ac93c696e10c.jpg",
+            },
+        ];
+
+        let currentIndex = 0;
+
+        // DOM elements
+        const imageContainer = document.getElementById("image-container");
+        const nameEl = document.getElementById("testimonial-name");
+        const titleEl = document.getElementById("testimonial-title");
+        const quoteEl = document.getElementById("testimonial-quote");
+        const leftButton = document.getElementById("left-button");
+        const rightButton = document.getElementById("right-button");
+
+        function getRandomRotation() {
+            return (Math.random() - 0.5) * 10;
+        }
+
+        function getRandomOffset() {
+            return (Math.random() - 0.5) * 20;
+        }
+
+        function initializeStack() {
+            const stack = document.getElementById('stack');
+            const totalCards = testimonials.length;
+            
+            for (let i = 0; i < totalCards; i++) {
+                if (i !== currentIndex) {
+                    const card = document.createElement('div');
+                    card.className = 'stack-card';
+                    const rotation = getRandomRotation();
+                    const offsetX = getRandomOffset();
+                    const offsetY = getRandomOffset();
+                    card.style.transform = `rotate(${rotation}deg) translate(${offsetX}px, ${offsetY}px)`;
+                    card.style.zIndex = 1;
+                    card.style.opacity = 0.7;
+                    
+                    const img = document.createElement('img');
+                    img.src = testimonials[i].image;
+                    img.alt = "Background card";
+                    
+                    card.appendChild(img);
+                    stack.insertBefore(card, stack.firstChild);
+                }
+            }
+        }
+
+        function createImageElement(src, className) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `image-wrapper ${className}`;
+            wrapper.style.setProperty('--random-rotation', `${getRandomRotation()}deg`);
+            
+            const img = document.createElement('img');
+            img.className = 'testimonial-image';
+            img.src = src;
+            img.alt = 'Testimonial';
+            
+            wrapper.appendChild(img);
+            return wrapper;
+        }
+
+        function updateTestimonial(index) {
+            const testimonial = testimonials[index];
+            
+            // Update background cards with smoother transitions
+            const stackCards = document.querySelectorAll('.stack-card');
+            stackCards.forEach(card => {
+                const rotation = getRandomRotation() * 0.7; // Reduced rotation
+                const offsetX = getRandomOffset() * 0.7; // Reduced offset
+                const offsetY = getRandomOffset() * 0.7;
+                card.style.transform = `rotate(${rotation}deg) translate(${offsetX}px, ${offsetY}px)`;
+            });
+
+            // Handle image transition
+            const currentImage = imageContainer.querySelector('.image-current');
+            if (currentImage) {
+                currentImage.classList.remove('image-current');
+                currentImage.classList.add('image-leaving');
+                setTimeout(() => {
+                    currentImage.remove();
+                }, 400); // Reduced timeout to match animation duration
+            }
+
+            // Create and add new image
+            const newImage = createImageElement(testimonial.image, 'image-entering');
+            imageContainer.appendChild(newImage);
+            
+            setTimeout(() => {
+                newImage.classList.remove('image-entering');
+                newImage.classList.add('image-current');
+            }, 500);
+
+            // Update text content with smoother animations
+            nameEl.textContent = testimonial.name;
+            titleEl.textContent = testimonial.title;
+
+            const words = testimonial.quote.split(" ");
+            quoteEl.innerHTML = "";
+            words.forEach((word, i) => {
+                const span = document.createElement("span");
+                span.className = "word";
+                span.style.animationDelay = `${i * 0.05}s`; // Reduced delay between words
+                span.textContent = word;
+                quoteEl.appendChild(span);
+                if (i < words.length - 1) {
+                    quoteEl.appendChild(document.createTextNode(" "));
+                }
+            });
+        }
+
+        // Initialize and set up event listeners
+        initializeStack();
+        updateTestimonial(currentIndex);
+
+        leftButton.addEventListener("click", () => {
+            currentIndex = (currentIndex - 1 + testimonials.length) % testimonials.length;
+            updateTestimonial(currentIndex);
+        });
+
+        rightButton.addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % testimonials.length;
+            updateTestimonial(currentIndex);
+        });
+    </script>
+</body>
+</html>
